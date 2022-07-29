@@ -1,0 +1,50 @@
+//- html
+//-     head
+//-         title Index Page
+//-     body 
+//-         #header 
+//-             h1 Hello Jade 
+//-             h2 Lorem Ipsum 
+//-         hr
+//-         .article
+//-             a(href = "http://www.naver.com",data-text="multiple Attribute") Go To Naver 
+
+html
+    head
+        title Index Page
+        style. 
+            h1{
+                color:blue;
+            }
+    body 
+    header 
+        h1 #{name}
+        h2= description
+    hr
+    - for(var i=0;i<10;i++){
+        p
+            a(href = "http://www.naver.com",data-test="multiple Attribute") Go To Naver #{i}
+    -}
+
+
+
+
+html
+    head 
+        title Index Page
+        style. 
+            h1{
+                color:blue;
+            }
+body 
+    #header
+        h1 #(name)
+        h2= description   
+    hr
+    - for(var i=0; i<10; i++){
+        p
+             a(href="http://www.naver.com", data-test="multiple Attribute") Go to Naver #{i}
+    -}
+
+
+        
