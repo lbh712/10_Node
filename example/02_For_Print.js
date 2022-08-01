@@ -1,4 +1,4 @@
-// #02 For 문 출력 확인 
+// #02 For문 출력 확인 
 
 //모둘 추출
 var express = require('express');
