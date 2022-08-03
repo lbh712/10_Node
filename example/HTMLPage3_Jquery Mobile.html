@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        $(function () {
+            var socket = io.connect();
+
+            socket.on('message', function (data) {
+                var output = '';
+                output += '<li>';
+                output += '<h3>' + data.name + '</h3>';
+                output += '<p>' + data.message + '</p>';
+                output += '<p>' + data.date + '</p>';
+                output += '</li>';
+
+                $(output).prependTo('#content');
+
+                //동적인 요소에 대한 css 적용
+                $('#content').listview('refresh');
+            });
+
+            $('#button').click(function () {
+                if ($('#name').val() == "") {
+                    alert("Nick Name을 입력하세요")
+                    $('#name').focus();
+                    return false;
+                }
+            });
+
+            $('button').click(function () {
+                if ($('#message').val() == "") {
+                    alert("message를 입력하세요")
+                    $('#message').focus();
+                    return false;
+                }
+                socket.emit('message', {
+                    name: $('#name').val(),
+                    message: $('#message').val(),
+                    date: new Date().toUTCString()
+                })
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div data-role="page">
+        <div data-role="header">
+            <h1>Socket.io Chat</h1>
+        </div>
+        <div data-role="content">
+            <h3>Nick Name</h3>
+            <input id="name" placeholder="Enter your Name">
+            <a data-role="button" href="#chatpage" id="button">Start Chat</a>
+        </div>
+    </div>
+
+    <div data-role="page" id="chatpage">
+        <div data-role="header">
+            <h1>Socket.io Chat</h1>
+        </div>
+        <div data-role="content">
+            <input id="message">
+            <button>전송</button>
+            <ul id="content" data-role="listview" data-inset="true">  
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,147 @@
+<!-- https://blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=hyoun1202&logNo=220671500986 -->
+<!-- http://meonggae.blogspot.com/2015/06/nodejs_3.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        .line {
+            overflow: hidden;
+        }
+
+        .seat {
+            margin: 2px;
+            float: left;
+            width: 30px;
+            height: 30px;
+            border-radius: 3px;
+        }
+
+        .enable {
+            background: gray;
+        }
+
+        .enable:hover {
+            background: black;
+        }
+
+        .disable {
+            background: red;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script>
+        var socket = io.connect();
+
+        socket.on('reserve', function (data) {
+            var $target = $('div[data-x =' + data.x + '][data-y =' + data.y + ']');
+            $target.removeClass('enable');
+            $target.addClass('disable');
+        });
+
+        socket.on('cancel', function (data) {
+            var $target = $('div[data-x =' + data.x + '][data-y =' + data.y + ']');
+            $target.removeClass('disable');
+            $target.addClass('enable');
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            //핸들러를 별도로 선언
+            var onClickSeat = function () {
+                var x = $(this).attr('data-x');
+                var y = $(this).attr('data-y');
+
+                if (confirm('해당 좌석으로 예약하시겠습니까?')) {
+                    $(this).off('click');
+                    socket.emit('reserve', {
+                        x: x,
+                        y: y
+                    });
+                } else {
+                    alert('취소 되었습니다.');
+                }
+            }
+
+            var offClickSeat = function () {
+                var x = $(this).attr('data-x');
+                var y = $(this).attr('data-y');
+
+                if (confirm('예약을 취소하시겠습니까?')) {
+                    $(this).off('cancel');
+                    socket.emit('cancel', {
+                        x: x,
+                        y: y
+                    });
+                } else {
+                    alert('취소 되었습니다.');
+                }
+            }
+
+            $.getJSON('/seats', { dummy: new Date().getTime() }, function (data) {
+                //data 파라미터에 저장된 좌석 정보를 Y축, X축으로 each()문을 돌려서
+                //좌석값에 따라(0, 1, 2) 적정한 스타일 시트를 적용한다.  
+                $.each(data, function (indexY, line) {
+                    var $line = $('<div></div>').addClass('line');
+                    $.each(line, function (indexX, seat) {
+                        var $output = $('<div></div>', {
+                            'class': 'seat',
+                            'data-x': indexX,
+                            'data-y': indexY
+                        }).appendTo($line);
+
+                        //0 : 좌석 표시가 없는 자리 (공란, 통로) 
+                        //1 : 예약이 가능한 좌석 
+                        //2 : 예약이 완료된 좌석
+
+                        if (seat == 1) {
+                            $output.addClass('enable').on('click', onClickSeat);
+                        } else if (seat == 2) {
+                            $output.addClass('disable');
+                        }
+
+                    });
+                    $line.appendTo('body');
+                });
+
+                $.each(data, function (indexY, line) {
+                    var $line = $('<div></div>').addClass('line');
+                    $.each(line, function (indexX, seat) {
+                        var $output = $('<div></div>', {
+                            'class': 'seat',
+                            'data-x': indexX,
+                            'data-y': indexY
+                        }).appendTo($line);
+
+                        //0 : 좌석 표시가 없는 자리 (공란, 통로) 
+                        //1 : 예약이 가능한 좌석 
+                        //2 : 예약이 완료된 좌석
+
+                        if (seat[y][x] == 2) {
+                            $output.removeClass('enable').on('cancel', offClickSeat);
+                        } else if (seat[y][x] == 1) {
+                            $output.addClass('disable');
+                        }
+
+                    });
+                    $line.appendTo('body');
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <button id="cancel">예약 취소</button>
+</body>
+
+</html>
